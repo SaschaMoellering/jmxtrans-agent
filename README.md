@@ -8,12 +8,10 @@ jmxtrans-agent is a version of [jmxtrans](http://jmxtrans.org/) intended to be u
 
 ## Java Agent Declaration
 
-Download [jmxtrans-agent-1.0.8.jar](http://repo1.maven.org/maven2/org/jmxtrans/agent/jmxtrans-agent/1.0.8/jmxtrans-agent-1.0.8.jar)
-
 Sample `setenv.sh` for Apache Tomcat
 
 ```
-export JAVA_OPTS="$JAVA_OPTS -javaagent:/path/to/jmxtrans-agent-1.0.8.jar=jmxtrans-agent.xml"
+export JAVA_OPTS="$JAVA_OPTS -javaagent:/path/to/jmxtrans-agent-1.0.10.jar=jmxtrans-agent.xml"
 ```
 
 * java agent jar path can be relative to the working dir
@@ -132,6 +130,8 @@ Out of the box output writers
   * `port`: StatsD listener port
   * `metricName`: metric name prefix. Optional, default value is machine hostname or IP (all `.` are scaped as `_`).
   * `bufferSize`: max buffer size. Holds data to be sent. Optional, default value is 1024.
+* [CloudWatchOutputWriter](https://github.com/SaschaMoellering/jmxtrans-agent/blob/master/src/main/java/org/jmxtrans/agent/CloudWatchOutputWriter.java): output to Amazon CloudWatch. Configuration parameters:
+  * `namespace`: CloudWatch namespaces are containers for metrics. Metrics in different namespaces are isolated from each other, so that metrics from different applications are not mistakenly aggregated into the same statistics.
 
 Output writers configuration support  an expression language based on property placeholders with the `{prop-name[:default-value]}` syntax (e.g. "`${graphite.host:2003}`").
 
@@ -213,10 +213,10 @@ You then have to make this implementation available in the classpath (adding it 
 # Sample ActiveMQ Configuration
 
 * Create directory `${ACTIVEMQ_HOME}/jmxtrans-agent/`
-* Copy `jmxtrans-agent-1.0.8.jar` under `${ACTIVEMQ_HOME}/jmxtrans-agent/`
+* Copy `jmxtrans-agent-1.0.10.jar` under `${ACTIVEMQ_HOME}/jmxtrans-agent/`
 * Update `${ACTIVEMQ_HOME}/bin/activemq`, add in `invoke_start()` and `invoke_console()`:
     ```
-JMXTRANS_AGENT="-javaagent:${ACTIVEMQ_HOME}/jmxtrans-agent/jmxtrans-agent-1.0.8.jar=${ACTIVEMQ_HOME}/jmxtrans-agent/jmxtrans-agent-activemq.xml"
+JMXTRANS_AGENT="-javaagent:${ACTIVEMQ_HOME}/jmxtrans-agent/jmxtrans-agent-1.0.10.jar=${ACTIVEMQ_HOME}/jmxtrans-agent/jmxtrans-agent-activemq.xml"
 ACTIVEMQ_OPTS="$ACTIVEMQ_OPTS $JMXTRANS_AGENT"
 ```
 * Copy to `${ACTIVEMQ_HOME}/jmxtrans-agent/` a config file similar to
