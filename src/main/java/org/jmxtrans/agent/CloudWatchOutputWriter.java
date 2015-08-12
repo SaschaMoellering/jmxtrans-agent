@@ -1,5 +1,6 @@
 package org.jmxtrans.agent;
 
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
@@ -49,7 +50,7 @@ public class CloudWatchOutputWriter extends AbstractOutputWriter implements Outp
             // Configuring the CloudWatch client
             // Credentials are loaded from the Amazon EC2 Instance Metadata Service
 
-            cloudWatchClient = new AmazonCloudWatchClient(new InstanceProfileCredentialsProvider());
+            cloudWatchClient = new AmazonCloudWatchClient(new DefaultAWSCredentialsProviderChain());
             awsRegion = Region.getRegion(Regions.fromName(getRegion()));
             cloudWatchClient.setRegion(awsRegion);
 
@@ -68,7 +69,10 @@ public class CloudWatchOutputWriter extends AbstractOutputWriter implements Outp
     }
 
     @Override
-    public void writeQueryResult(@Nonnull String metricName, @Nullable String metricType, @Nullable Object value) throws IOException {
+    public synchronized void writeQueryResult(@Nonnull String metricName, @Nullable String metricType, @Nullable Object value) throws IOException {
+
+        logger.log(getDebugLevel(), "Writing metric " + metricName + " with value " + value);
+
         PutMetricDataRequest metricDataRequest = new PutMetricDataRequest();
         metricDataRequest.setNamespace(namespace);
         List<MetricDatum> metricDatumList = new ArrayList<MetricDatum>();
@@ -84,6 +88,8 @@ public class CloudWatchOutputWriter extends AbstractOutputWriter implements Outp
         metricDataRequest.setMetricData(metricDatumList);
 
         cloudWatchClient.putMetricData(metricDataRequest);
+        logger.log(getDebugLevel(), "Metric " + metricName + " with value " + value + " is written");
+
     }
 
     /**

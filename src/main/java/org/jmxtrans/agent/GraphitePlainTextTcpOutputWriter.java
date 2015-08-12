@@ -24,6 +24,7 @@
 package org.jmxtrans.agent;
 
 import org.jmxtrans.agent.util.net.HostAndPort;
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -85,11 +86,25 @@ public class GraphitePlainTextTcpOutputWriter extends AbstractOutputWriter imple
         }
         String hostname;
         try {
-            hostname = InetAddress.getLocalHost().getHostName().replaceAll("\\.", "_");
+
+            if (null != System.getenv("ZANOX_SERVER_NAME")
+                    && System.getenv("ZANOX_SERVER_NAME").trim().length() > 0) {
+                hostname = System.getenv("ZANOX_SERVER_NAME");
+                logger.log(getInfoLevel(), "ZANOX_SERVER_NAME is set to " + hostname);
+                if (null != System.getenv("ZANOX_APP_NAME")
+                        && System.getenv("ZANOX_APP_NAME").trim().length() > 0) {
+                    String appName = System.getenv("ZANOX_APP_NAME");
+                    logger.log(getInfoLevel(), "ZANOX_APP_NAME is set to " + appName);
+                    hostname = new StringBuffer(hostname).append(".").append(appName).toString();
+                }
+            } else {
+                hostname = InetAddress.getLocalHost().getHostName().replaceAll("\\.", "_");
+            }
         } catch (UnknownHostException e) {
             hostname = "#unknown#";
         }
         metricPathPrefix = "servers." + hostname + ".";
+        logger.log(getInfoLevel(), "metricPathPrefix is " + metricPathPrefix);
         return metricPathPrefix;
     }
 
